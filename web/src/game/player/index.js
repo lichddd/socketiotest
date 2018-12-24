@@ -11,7 +11,7 @@ const SCALE = 1
 const SHOOT_SPEED = 5
 const SHOOT_NUM = 5
 export default class Player extends createjs.Container {
-  constructor(cantiner,headurl=PLAYER_IMG_SRC) {
+  constructor(cantiner,headurl=PLAYER_IMG_SRC,name="") {
     super();
     this.cantiner = this;
     headurl=headurl?headurl.replace(/\/[0-9]{1,3}$/,"/64"):PLAYER_IMG_SRC;
@@ -23,6 +23,7 @@ export default class Player extends createjs.Container {
         // play: [0,0,"play",0.2]
       }
     });
+
     this.player = new createjs.Sprite(this.spriteSheetPlayer, "play");
 
     this.maskshape = new createjs.Shape();
@@ -47,6 +48,11 @@ export default class Player extends createjs.Container {
     // 用于在手指移动的时候标识手指是否已经在飞机上了
     this.touched = false
 
+
+
+    this.name_label = new createjs.Text(`${name}`, "21px  Arial", "#FFF");
+    this.name_label.textAlign = "center";
+    this.cantiner.addChild(this.name_label);
     // 初始化事件监听
     this.initEvent();
     // wx.startAccelerometer({ success:()=>{console.log('开始监听加速计')}});
@@ -60,6 +66,8 @@ export default class Player extends createjs.Container {
     this.player.y += this.player.speedy;
     this.maskshape.x = this.player.x;
     this.maskshape.y = this.player.y;
+    this.name_label.x = this.player.x -this.name_label.lineWidth;
+    this.name_label.y = this.player.y - 60;
     this.setAirPosAcrossFingerPosZ(this.player.x, this.player.y);
     this.bullet.update(test);
   }

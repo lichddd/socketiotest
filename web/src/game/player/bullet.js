@@ -42,5 +42,4 @@ export default class Bullet extends Bullet_Super {
             s.y -= s.speed;
         }, (s) => {}, (s) => {}, test);
     }
-
 }

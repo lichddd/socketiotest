@@ -1,3 +1,5 @@
+import io from 'socket.io-client'
+
 import './libs/ease'
 import Player from './player/index'
 import Boss from './npc/boss'
@@ -12,7 +14,7 @@ const screenHeight = 640
  * 游戏主函数
  */
 export default class Main {
-  constructor(canvas) {
+  constructor(canvas,n="") {
     // wx.setPreferredFramesPerSecond(60);
     this.canvas=canvas;
     this.frame=0;
@@ -22,11 +24,26 @@ export default class Main {
     createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
     this.stage = new createjs.Stage(this.canvas);
     this.init();
+
+    this.socket_game = io(`${config.url}/game`);
+    this.socket_game.emit('login',n);
+    this.socket_game.on('join', (data)=>{
+        window.main.join(data);
+    });
+    this.socket_game.on('leave', (data)=>{
+        window.main.leave(data);
+    });
+    this.socket_game.on('move', (data)=>{
+        window.main.move(data);
+    });
+    this.socket_game.on('position', (data)=>{
+        window.main.position(data);
+    });
   }
   init(user_info=""){
     this.bg = new BackGround();
     this.stage.addChild(this.bg);
-    this.player = new Player(this.stage,user_info.avatarUrl,10);
+    this.player = new Player(this.stage,user_info.avatarUrl);
     this.friends=[];
     this.stage.addChild(this.player);
     this.boss = new Boss(this.stage);
@@ -37,40 +54,64 @@ export default class Main {
       this.TimerHandel.bind(this),
       this.canvas
     )
+    let alock=false;
+    let dlock=false;
+    let wlock=false;
+    let slock=false;
     window.addEventListener('keydown',(e)=>{
       if (e.key=="a") {
+        if (alock) {
+          return ;
+        }
+        alock=true;
         this.player.player.speedx=-5;
       }
       if (e.key=="d") {
+        if (dlock) {
+          return ;
+        }
+        dlock=true;
         this.player.player.speedx=5;
       }
       if (e.key=="w") {
+        if (wlock) {
+          return ;
+        }
+        wlock=true;
         this.player.player.speedy=-5;
       }
       if (e.key=="s") {
+        if (slock) {
+          return ;
+        }
+        slock=true;
         this.player.player.speedy=5;
       }
 
-      socket_game.emit('move',{sx:this.player.player.speedx,sy:this.player.player.speedy});
+      this.socket_game.emit('move',{sx:this.player.player.speedx,sy:this.player.player.speedy});
 
     });
 
     window.addEventListener('keyup',(e)=>{
       if (e.key=="a") {
+        alock=false;
         this.player.player.speedx=0;
       }
       if (e.key=="d") {
+        dlock=false;
         this.player.player.speedx=0;
       }
       if (e.key=="w") {
+        wlock=false;
         this.player.player.speedy=0;
       }
       if (e.key=="s") {
+        slock=false;
         this.player.player.speedy=0;
       }
 
 
-      socket_game.emit('move',{sx:this.player.player.speedx,sy:this.player.player.speedy});
+      this.socket_game.emit('move',{sx:this.player.player.speedx,sy:this.player.player.speedy});
 
     });
   }
@@ -90,7 +131,7 @@ export default class Main {
   }
   join(data)
   {
-    let n=new Player(this.stage,null,10);
+    let n=new Player(this.stage,null,data.name);
     n.sid=data.id;
     this.friends.push(n);
     this.stage.addChild(n);
@@ -112,7 +153,7 @@ export default class Main {
     }
     if (this.frame % 30 === 0) {
       this.player.shoot();
-      socket_game.emit('position',{x:this.player.player.x,y:this.player.player.y});
+      this.socket_game.emit('position',{x:this.player.player.x,y:this.player.player.y});
     }
     if (this.frame % 30 === 0) {
       this.friends.forEach(f=>f.shoot());
@@ -159,17 +200,3 @@ export default class Main {
     });
   }
 }
-import io from 'socket.io-client'
-let socket_game = io(`${config.url}/game`);
-socket_game.on('join', (data)=>{
-    window.main.join(data);
-});
-socket_game.on('leave', (data)=>{
-    window.main.leave(data);
-});
-socket_game.on('move', (data)=>{
-    window.main.move(data);
-});
-socket_game.on('position', (data)=>{
-    window.main.position(data);
-});

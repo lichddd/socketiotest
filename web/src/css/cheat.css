@@ -1,5 +1,23 @@
 .cheat .msg
 {
-  width: 600px;
-  height: 100px;
+  width: 100%;
+  height: calc(100% - 30px);
+  overflow-y: scroll;
+}
+.cheat
+{
+padding: 5px;
+height: 200px;
+}
+.cheat input
+{
+border: solid 1px #ababab;
+border-radius: 5px;
+height: 30px;;
+width:100%;
+}
+.cheat p
+{
+margin: 0px;
+word-wrap: break-word;
 }

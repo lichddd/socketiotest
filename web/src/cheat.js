@@ -22,11 +22,15 @@ export default class Cheat
     }
   });
     socket.on('connect', ()=>{
-      socket.send('hi');
 
     });
     socket.on('message', (msg)=>{
-        this.msg.append(msg);
+        let p=document.createElement('p');
+        p.innerHTML=`${msg.name}:${msg.data}`;
+        this.msg.append(p);
     });
+  }
+  getSocket(){
+    return socket;
   }
 }
